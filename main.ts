@@ -1,36 +1,55 @@
-// A working best-site-01 entry (Node 22, standard library only): the site is this directory's app/ folder, plain
-// static files a browser opens at app/index.html (ES modules, CSS, no build step), its content held in its own files:
-// nothing it runs, styles or shows loads over the network. The program hands it in: it copies app/ and screenshots/
-// from beside this file to /output and writes /output/dossier.json, the summary the judge reads (your screenshots, the
-// first load's files and bytes, and your source), with the vendored make.fun library. Leave vendor/makefun-frontend.ts
-// as it is: the scorer requires dossier.json to be byte for byte what its own copy writes.
+// Home Ledger hand-in (Node 22, standard library only).
 //
-// A starting point, not a winner: a plain recipe collection, a list of recipes and a page for each. Build the site the
-// brief asks for in app/ (its content, ease of use, a phone layout, its look), put 3 or 4 PNG or JPEG screenshots of
-// it running in screenshots/ (the first by name is the cover; one may be a 390 x 844 phone view; shots.json says which
-// views this starter's were taken of), and run it.
+// The site itself is the app/ folder beside this file: plain static files a
+// browser opens at app/index.html — ES modules and CSS, no build step, and
+// nothing it runs, styles or shows comes from the network. This program
+// hands the site in: it copies app/ and screenshots/ into the output
+// directory and writes dossier.json there, the summary the judge reads,
+// using the vendored make.fun library in vendor/makefun-frontend.ts (left
+// exactly as the kit ships it, because the scorer rebuilds the dossier with
+// its own copy and compares the two byte for byte).
 //
-// Serve it locally with `node serve.ts`, then open http://localhost:8080.
-// Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
+// Run it the way the grader does, with MAKEFUN_OUTPUT_DIR standing in for
+// /output outside the container:
+//
 //   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
+//
+// To look at the site itself, serve app/ with `node serve.ts` and open
+// http://localhost:8080.
 
 import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDossier } from './vendor/makefun-frontend.ts';
 
-const here = fileURLToPath(new URL('.', import.meta.url));
-const out = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
+// Where this file lives (the repository root) and where the hand-in goes.
+const repoRoot = fileURLToPath(new URL('.', import.meta.url));
+const outputDir = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
 
-mkdirSync(out, { recursive: true });
-cpSync(join(here, 'app'), join(out, 'app'), { recursive: true });
-mkdirSync(join(out, 'screenshots'), { recursive: true });
-if (existsSync(join(here, 'screenshots'))) cpSync(join(here, 'screenshots'), join(out, 'screenshots'), { recursive: true });
+// The scorer's caps, from the kit's gate.json. Only text_max_bytes shapes the
+// dossier's bytes; the rest make this program refuse exactly what the scorer
+// would refuse — more than 4 screenshots or one over 256 KiB, more than 993
+// files and directories under app/, or more than 16 MiB of app files.
+const CAPS = {
+  text_max_bytes: 163840,
+  screenshots: { max: 4, max_bytes: 262144 },
+  app_max_files: 993,
+  app_max_bytes: 16777216,
+};
 
-// The scorer's own caps (reference/gate.json): only text_max_bytes shapes the bytes; the others refuse an entry the
-// scorer would refuse (more than 4 screenshots or one over 256 KiB; more than 993 files and directories in app/ or
-// 16 MiB of app files: app/ counts beside /output's own 1000-entry cap, its screenshots/ and dossier.json).
-writeFileSync(
-  join(out, 'dossier.json'),
-  buildDossier(out, { text_max_bytes: 163840, screenshots: { max: 4, max_bytes: 262144 }, app_max_files: 993, app_max_bytes: 16777216 }),
-);
+function copyInto(from, to) {
+  mkdirSync(to, { recursive: true });
+  cpSync(from, to, { recursive: true });
+}
+
+mkdirSync(outputDir, { recursive: true });
+copyInto(join(repoRoot, 'app'), join(outputDir, 'app'));
+const shotsFrom = join(repoRoot, 'screenshots');
+if (existsSync(shotsFrom)) {
+  copyInto(shotsFrom, join(outputDir, 'screenshots'));
+} else {
+  mkdirSync(join(outputDir, 'screenshots'), { recursive: true });
+}
+
+writeFileSync(join(outputDir, 'dossier.json'), buildDossier(outputDir, CAPS));
+console.log(`dossier.json written to ${join(outputDir, 'dossier.json')}`);
