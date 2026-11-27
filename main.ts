@@ -17,7 +17,7 @@
 // To look at the site itself, serve app/ with `node serve.ts` and open
 // http://localhost:8080.
 
-import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDossier } from './vendor/makefun-frontend.ts';
@@ -52,4 +52,7 @@ if (existsSync(shotsFrom)) {
 }
 
 writeFileSync(join(outputDir, 'dossier.json'), buildDossier(outputDir, CAPS));
-console.log(`dossier.json written to ${join(outputDir, 'dossier.json')}`);
+// The judge reads dossier.json from the output directory, so hand it the
+// exact copy buildDossier produced, and say how big it came out.
+const dossierBytes = statSync(join(outputDir, 'dossier.json')).size;
+console.log(`dossier.json written to ${join(outputDir, 'dossier.json')} (${dossierBytes} bytes)`);
