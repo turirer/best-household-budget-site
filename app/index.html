@@ -3,13 +3,34 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Weeknight Kitchen</title>
+<title>Home Ledger — household budget book</title>
+<meta name="description" content="Home Ledger: plan a household budget, track every transaction, watch savings goals grow and keep bills paid — all in your browser, no account, works offline.">
 <link rel="stylesheet" href="style.css">
 <script type="module" src="main.js"></script>
 </head>
 <body>
-<header><a href="#/">Weeknight Kitchen</a></header>
-<main id="app"></main>
-<footer>Six recipes for busy evenings.</footer>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="#/">
+      <span class="brand-mark" aria-hidden="true">HL</span>
+      <span class="brand-text">Home Ledger<small id="household-name">Household budget book</small></span>
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="#/" data-nav="dashboard">Dashboard</a>
+      <a href="#/budget" data-nav="budget">Budget</a>
+      <a href="#/transactions" data-nav="transactions">Transactions</a>
+      <a href="#/goals" data-nav="goals">Goals</a>
+      <a href="#/bills" data-nav="bills">Bills</a>
+      <a href="#/about" data-nav="about">About</a>
+    </nav>
+  </div>
+</header>
+<main id="app" class="wrap"></main>
+<footer class="site-footer">
+  <div class="wrap">
+    <span>Home Ledger — your household's money, in one book. Viewing <span id="footer-month">this month</span>.</span>
+    <span class="footer-note">Demo data lives in your browser only; nothing leaves this device.</span>
+  </div>
+</footer>
 </body>
 </html>
